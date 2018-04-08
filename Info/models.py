@@ -9,16 +9,35 @@ from django.db import models
 
 
 class Departments(models.Model):
-    dept_no = models.CharField(primary_key=True, max_length=4)
-    dept_name = models.CharField(unique=True, max_length=40)
+    def __str__(self):
+        return self.dept_name
+    dept_no = models.CharField(primary_key=True, max_length=4,verbose_name='部门信息')
+    dept_name = models.CharField(unique=True, max_length=40,verbose_name='部门编号')
 
     class Meta:
         managed = False
         db_table = 'departments'
 
+class Employees(models.Model):
+
+    def __str__(self):
+        return self.first_name+self.last_name
+
+    GENDER_CHOICE=(('F','Female'),('M','Male'))
+    emp_no = models.IntegerField(primary_key=True,verbose_name='员工编号')
+    birth_date = models.DateField(verbose_name='生日')
+    first_name = models.CharField(max_length=14)
+    last_name = models.CharField(max_length=16)
+    gender = models.CharField(max_length=1,verbose_name='性别')
+    hire_date = models.DateField(verbose_name='入职时间')
+
+    class Meta:
+        managed = False
+        db_table = 'employees'
+        ordering='+emp_no'
 
 class DeptEmp(models.Model):
-    emp_no = models.ForeignKey('Employees', models.DO_NOTHING, db_column='emp_no', primary_key=True)
+    emp_no = models.ForeignKey(Employees, models.DO_NOTHING, db_column='emp_no', primary_key=True)
     dept_no = models.ForeignKey(Departments, models.DO_NOTHING, db_column='dept_no')
     from_date = models.DateField()
     to_date = models.DateField()
@@ -30,7 +49,7 @@ class DeptEmp(models.Model):
 
 
 class DeptManager(models.Model):
-    emp_no = models.ForeignKey('Employees', models.DO_NOTHING, db_column='emp_no', primary_key=True)
+    emp_no = models.ForeignKey(Employees, models.DO_NOTHING, db_column='emp_no', primary_key=True)
     dept_no = models.ForeignKey(Departments, models.DO_NOTHING, db_column='dept_no')
     from_date = models.DateField()
     to_date = models.DateField()
@@ -41,17 +60,7 @@ class DeptManager(models.Model):
         unique_together = (('emp_no', 'dept_no'),)
 
 
-class Employees(models.Model):
-    emp_no = models.IntegerField(primary_key=True)
-    birth_date = models.DateField()
-    first_name = models.CharField(max_length=14)
-    last_name = models.CharField(max_length=16)
-    gender = models.CharField(max_length=1)
-    hire_date = models.DateField()
 
-    class Meta:
-        managed = False
-        db_table = 'employees'
 
 
 class Salaries(models.Model):
